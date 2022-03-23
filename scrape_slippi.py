@@ -86,6 +86,7 @@ while not main_empty:
             tournament.click()
             time.sleep(3)
             back_counter = scrape_tournament(driver)
+            print(f'RETURNING ON PAGE: {back_counter}')
             # back_counter = 1
             #return to main
             for _ in range(back_counter):
