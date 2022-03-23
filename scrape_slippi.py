@@ -49,7 +49,7 @@ def scrape_tournament(driver):
             try:
                 ui_buttons = driver.find_elements_by_class_name('MuiSvgIcon-root')
                 ui_buttons[-1].click()
-                time.sleep(5)
+                time.sleep(8)
                 counter += 1
             except:
                 empty = True
@@ -68,7 +68,7 @@ button_ui.click()
 button_tournament = driver.find_element_by_xpath('/html/body/div[3]/div[3]/div/ul/div[2]')
 button_tournament.click()
 
-time.sleep(3)
+time.sleep(5)
 
 main_empty = False
 
@@ -85,8 +85,8 @@ while not main_empty:
             tournament = tournament_buttons[t]
             tournament.click()
             time.sleep(3)
-            #back_counter = scrape_tournament(driver)
-            back_counter = 1
+            back_counter = scrape_tournament(driver)
+            # back_counter = 1
             #return to main
             for _ in range(back_counter):
                 driver.back()
@@ -96,7 +96,7 @@ while not main_empty:
         try:
             ui_buttons = driver.find_elements_by_class_name('MuiSvgIcon-root')
             ui_buttons[-1].click()
-            time.sleep(3)
+            time.sleep(5)
         except:
             main_empty = True
         
