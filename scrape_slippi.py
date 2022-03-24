@@ -5,8 +5,22 @@ from selenium.webdriver.common.by import By
 import time
 import urllib
 import warnings
+import argparse
 
+#issues with getting the newer version of the function working
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-p','--page', type=int, required = False, default = 0,
+                    help='tournament page to start on, starts at 0, >= 0')
+parser.add_argument('-t','--tour', type=int, required = False, default = 0,
+                    help='tournament index to start on, starts at 0, >= 0')
+
+args = parser.parse_args()
+
+#check args
+assert args.page >= 0
+assert args.tour >= 0
 
 def download_slp(url_loc, dl = True):
     """
@@ -47,9 +61,7 @@ def scrape_tournament(driver):
         empty = page_download(soup)
         if not empty:
             try:
-                ui_buttons = driver.find_elements_by_class_name('MuiSvgIcon-root')
-                ui_buttons[-1].click()
-                time.sleep(8)
+                next_page()
                 counter += 1
             except:
                 empty = True
@@ -58,12 +70,27 @@ def scrape_tournament(driver):
             print(f'EMPTY PAGE FOUND ON {counter}')
     return counter
 
+def next_page():
+    ui_buttons = driver.find_elements_by_class_name('MuiSvgIcon-root')
+    ui_buttons[-1].click()
+    time.sleep(8)
+
+while args.page > 0:
+    try:
+        next_page()
+    except:
+        #write proper exception later
+        assert 0==1
+
+#open window and go to the first page
 driver = webdriver.Firefox()
 url = 'https://slippi.gg/' 
 driver.get(url)
+
 #open menu to show links
 button_ui = driver.find_element_by_xpath('/html/body/div[1]/div/header/div/header/div/button')
 button_ui.click()
+
 #click button for tournaments
 button_tournament = driver.find_element_by_xpath('/html/body/div[3]/div[3]/div/ul/div[2]')
 button_tournament.click()
@@ -73,31 +100,43 @@ time.sleep(5)
 main_empty = False
 
 while not main_empty:
+    #check number of tournaments on the page
     tournament_buttons = driver.find_elements_by_partial_link_text('Browse all games')
     tournament_count = len(tournament_buttons)
     print(tournament_count)
 
     if tournament_count != 0:
-        for t in range(tournament_count):
+        #change starting tournament
+        if args.tour >= tournament_count:
+            #write proper exception later
+            assert 0==1
+
+        for t in range(args.tour, tournament_count):
             #enter page
             print(f'TOURNAMENT {t + 1}')
+
+            #need to refetch links each time
             tournament_buttons = driver.find_elements_by_partial_link_text('Browse all games')
             tournament = tournament_buttons[t]
+
+            args.tour = 0
+
+            #scrape
             tournament.click()
             time.sleep(3)
             back_counter = scrape_tournament(driver)
+
             print(f'RETURNING ON PAGE: {back_counter}')
+
             # back_counter = 1
-            #return to main
+            #return to main tournament page
             for _ in range(back_counter):
                 driver.back()
                 time.sleep(1)
 
         print('NEXT TOURNAMENT PAGE')
         try:
-            ui_buttons = driver.find_elements_by_class_name('MuiSvgIcon-root')
-            ui_buttons[-1].click()
-            time.sleep(5)
+            next_page()
         except:
             main_empty = True
         
