@@ -11,16 +11,18 @@ import argparse
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-p','--page', type=int, required = False, default = 0,
-                    help='tournament page to start on, starts at 0, >= 0')
-parser.add_argument('-t','--tour', type=int, required = False, default = 0,
-                    help='tournament index to start on, starts at 0, >= 0')
+parser.add_argument('-p','--page', type=int, required = False, default = 1,
+                    help='tournament page to start on, starts at 0, >= 1')
+parser.add_argument('-t','--tour', type=int, required = False, default = 1,
+                    help='tournament index to start on, starts at 0, >= 1')
 
 args = parser.parse_args()
 
 #check args
-assert args.page >= 0
-assert args.tour >= 0
+assert args.page >= 1
+assert args.tour >= 1
+args.page -= 1
+args.tour -= 1
 
 def download_slp(url_loc, dl = True):
     """
@@ -75,13 +77,6 @@ def next_page():
     ui_buttons[-1].click()
     time.sleep(8)
 
-while args.page > 0:
-    try:
-        next_page()
-    except:
-        #write proper exception later
-        assert 0==1
-
 #open window and go to the first page
 driver = webdriver.Firefox()
 url = 'https://slippi.gg/' 
@@ -96,6 +91,14 @@ button_tournament = driver.find_element_by_xpath('/html/body/div[3]/div[3]/div/u
 button_tournament.click()
 
 time.sleep(5)
+
+#skip to indented page
+for _ in range(0,args.page):
+    try:
+        next_page()
+    except:
+        #write proper exception later
+        assert 0==1
 
 main_empty = False
 
@@ -115,10 +118,15 @@ while not main_empty:
             #enter page
             print(f'TOURNAMENT {t + 1}')
 
+            #skip to inputted tournament
+            if args.tour > 0:
+                t = args.tour
+
             #need to refetch links each time
             tournament_buttons = driver.find_elements_by_partial_link_text('Browse all games')
             tournament = tournament_buttons[t]
 
+            #reset tournament counter
             args.tour = 0
 
             #scrape
