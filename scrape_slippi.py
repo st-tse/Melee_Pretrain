@@ -15,6 +15,8 @@ parser.add_argument('-p','--page', type=int, required = False, default = 1,
                     help='tournament page to start on, starts at 0, >= 1')
 parser.add_argument('-t','--tour', type=int, required = False, default = 1,
                     help='tournament index to start on, starts at 0, >= 1')
+parser.add_argument('-d','--download', type=bool, required=False, default = True,
+                    help='download file or print, used for debugging')
 
 args = parser.parse_args()
 
@@ -38,20 +40,16 @@ def download_slp(url_loc, dl = True):
         else:
             print(name)
 
-def page_download(soup):
+def page_download(soup, dl):
     """
     download all .slp files from a page
     """
-    empty = True
     for i, link in enumerate(soup.findAll('a')):
         file_url = link.get('href')
         if not (file_url is None) and (file_url[:30] == 'https://storage.googleapis.com'):
-            download_slp(file_url.replace(' ','%20'), True) #toggle saving
-            if empty:
-                empty = False
-    return empty
+            download_slp(file_url.replace(' ','%20'), dl)
 
-def scrape_tournament(driver):
+def scrape_tournament(driver, dl):
     """
     scrape through a tournament
     """
@@ -60,12 +58,13 @@ def scrape_tournament(driver):
     while not empty:
         html = driver.page_source
         soup = bs(html)
-        empty = page_download(soup)
+        empty = page_download(soup, dl)
         if not empty:
             try:
                 next_page()
                 counter += 1
             except:
+                #break out of page
                 empty = True
                 
         else:
@@ -75,7 +74,7 @@ def scrape_tournament(driver):
 def next_page():
     ui_buttons = driver.find_elements_by_class_name('MuiSvgIcon-root')
     ui_buttons[-1].click()
-    time.sleep(8)
+    time.sleep(3)
 
 #open window and go to the first page
 driver = webdriver.Firefox()
@@ -90,7 +89,7 @@ button_ui.click()
 button_tournament = driver.find_element_by_xpath('/html/body/div[3]/div[3]/div/ul/div[2]')
 button_tournament.click()
 
-time.sleep(5)
+time.sleep(3)
 
 #skip to indented page
 for _ in range(0,args.page):
@@ -132,7 +131,8 @@ while not main_empty:
             #scrape
             tournament.click()
             time.sleep(3)
-            back_counter = scrape_tournament(driver)
+            back_counter = scrape_tournament(driver, args.download)
+            #back_counter = 1
 
             print(f'RETURNING ON PAGE: {back_counter}')
 
