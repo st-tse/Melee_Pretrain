@@ -3,9 +3,9 @@ from slippi import Game
 from slippi.parse import parse
 from slippi.parse import ParseEvent
 import pandas as pd
-from os import listdir
+from os import listdir, chdir
 from os.path import isfile, join
-import tqdm
+from tqdm import tqdm 
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -34,7 +34,7 @@ def add_replay(file_name, d, k, args):
     if game is None:
             print(f'{file_name} is None')
     else: 
-        for i in tqdm(range(len(game.start.players))):
+        for i in range(len(game.start.players)):
             pl = game.start.players[i]
             if not(pl is None):
                 char = pl.character.name
@@ -47,7 +47,7 @@ def add_replay(file_name, d, k, args):
 def replays_to_df(replay_names, args):
     data = dict()
     k = 0
-    for replay in replay_names:
+    for replay in tqdm(replay_names):
         data, k = add_replay(replay, data, k, args)
     df = pd.DataFrame.from_dict(data, columns=['Game_ID','CHAR', 'Port','Frame', 'Pre_frame', 'Post_frame'], orient='index')
     return df
@@ -89,4 +89,8 @@ files = listdir('Replays/')
 df = replays_to_df(files[:args.count], args)
 df = get_states(df)
 df = get_buttons(df)
-df.to_csv(path = f'{args.output}/', name = f'{args.name} + .csv')
+
+chdir(f'{args.output}/')
+df.to_csv(f'{args.name} + .csv')
+
+print('Done')
