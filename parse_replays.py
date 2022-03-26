@@ -91,6 +91,6 @@ df = get_states(df)
 df = get_buttons(df)
 
 chdir(f'{args.output}/')
-df.to_csv(f'{args.name} + .csv')
+df.to_csv(f'{args.name}')
 
 print('Done')
