@@ -34,7 +34,7 @@ def download_slp(url_loc, dl = True):
     with urllib.request.urlopen(url_loc) as url:
         name = url_loc[url_loc.find('_') + 1:]
         if dl == True:
-            data = open("Data/" + name, 'wb')
+            data = open("Replays/" + name, 'wb')
             data.write(url.read())
             data.close()
         else:
