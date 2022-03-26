@@ -1,3 +1,5 @@
 selenium
 urllib
 beautifulsoup4
+pytorch
+py-slippi
