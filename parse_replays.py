@@ -128,40 +128,41 @@ y_cols_P2 =['Game_ID','Frame','B_damage_P2', 'B_direction_P2',
 
 files = listdir(f'{args.replays}/')
 chdir(f'{args.output}/')
-
+first = True
 
 batch_number = args.resume_batch
 for i in range((args.resume_batch - 1) * args.batch_size, len(files), args.batch_size):
-    print(i, i + args.batch_size)
     
+    df = replays_to_df(files[i:i+args.batch_size])
 
-    #df.to_csv(f'{args.name}' + '.csv', index=False)
+    df = get_states(df)
+    df = get_buttons(df)
+
+    df_X = df[X_cols]
+    df_y_P1 = df[y_cols_P1]
+    df_y_P2 = df[y_cols_P2]
+
+    df_y_P1['Frame'] = df_y_P1['Frame'].apply(lambda x : x - 1)
+    df_y_P2['Frame'] = df_y_P2['Frame'].apply(lambda x : x - 1)
+
+    out1 = pd.merge(df_X, df_y_P1, on=['Game_ID', 'Frame'])
+
+    df_X2 = df_column_switch(df_X, 'CHAR_P1', 'CHAR_P2')
+
+    df_y_P2 = df_y_P2.reindex(columns=['Game_ID','Frame','B_damage_P1',
+           'B_direction_P1', 'B_joystick_x_P1', 'B_joystick_y_P1',
+           'B_position_x_P1', 'B_position_y_P1', 'B_cstick_x_P1', 'B_cstick_y_P1',
+           'B_state_P1', 'B_raw_analog_P1', 'B_buttons_physical_P1',
+           'B_triggers_physical_l_P1', 'B_triggers_physical_r_P1',
+           'B_triggers_logical_P1'])
+
+    out2 = pd.merge(df_X2, df_y_P2, on=['Game_ID', 'Frame'])
+
+    out = pd.concat([out1,out2],ignore_index=True)
+
+    out.to_csv(f'{args.out_name}' + '.csv', index=False, mode = 'a', header = first)
+    if first:
+        first = False
 
     print(f'{batch_number}/{int(np.ceil(len(files) / args.batch_size))} Completed')
     batch_number += 1
-# df = replays_to_df(files[:5])
-
-# df = get_states(df)
-# df = get_buttons(df)
-
-# df_X = df[X_cols]
-# df_y_P1 = df[y_cols_P1]
-# df_y_P2 = df[y_cols_P2]
-
-# df_y_P1['Frame'] = df_y_P1['Frame'].apply(lambda x : x - 1)
-# df_y_P2['Frame'] = df_y_P2['Frame'].apply(lambda x : x - 1)
-
-# out1 = pd.merge(df_X, df_y_P1, on=['Game_ID', 'Frame'])
-
-# df_X2 = df_column_switch(df_X, 'CHAR_P1', 'CHAR_P2')
-
-# df_y_P2 = df_y_P2.reindex(columns=['Game_ID','Frame','B_damage_P1',
-#        'B_direction_P1', 'B_joystick_x_P1', 'B_joystick_y_P1',
-#        'B_position_x_P1', 'B_position_y_P1', 'B_cstick_x_P1', 'B_cstick_y_P1',
-#        'B_state_P1', 'B_raw_analog_P1', 'B_buttons_physical_P1',
-#        'B_triggers_physical_l_P1', 'B_triggers_physical_r_P1',
-#        'B_triggers_logical_P1'])
-
-# out2 = pd.merge(df_X2, df_y_P2, on=['Game_ID', 'Frame'])
-
-# out = pd.concat([out1,out2],ignore_index=True)
