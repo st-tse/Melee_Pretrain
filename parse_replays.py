@@ -1,13 +1,8 @@
 from slippi import Game
-from slippi.parse import parse
-from slippi.parse import ParseEvent
 import pandas as pd
 from os import listdir
-from os.path import isfile, join
 from os import listdir, chdir
-from tqdm import tqdm 
 import argparse
-from unicodedata import name
 import numpy as np
 
 import warnings
