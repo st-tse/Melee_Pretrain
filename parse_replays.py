@@ -23,8 +23,11 @@ parser.add_argument('-o','--output', type=str, default = 'Data',
                     help='output folder file path')
 parser.add_argument('-n','--out_name', type=str, default = 'replay_by_frame',
                     help='output file name') 
-parser.add_argument('-off','--offset', type=str, default = 6,
-                    help='frame offset between state and buttons to predict') 
+parser.add_argument('-off','--offset', type=int, default = 6,
+                    help='frame offset between state and buttons to predict')
+parser.add_argument('-c', '--characters', type=list,  nargs='+', required = False, default = ['FOX', 'MARTH'],
+                    help='frame offset between state and buttons to predict')
+
 
 args = parser.parse_args()
 
@@ -50,7 +53,7 @@ def add_replay(file_name, d, k):
     """
     game = read_game(file_name)
     if game is None:
-            print(f'{file_name} is None')
+        print(f'{file_name} is None')
     else: 
         #get used ports
         pls = [i for i, p in enumerate(game.start.players) if not(p is None)]
@@ -58,10 +61,11 @@ def add_replay(file_name, d, k):
         char_1 = player_info[pls[0]].character.name
         char_2 = player_info[pls[1]].character.name
         head = [file_name, char_1, char_2]
+        if (char_1 in args.characters) and (char_2 in args.characters):
         #add each frame
-        for f in range(len(game.frames)):
-            d[k] = head + [f] + parse_frame_at_port(game, f, pls[0]) + parse_frame_at_port(game, f, pls[1])
-            k += 1
+            for f in range(len(game.frames)):
+                d[k] = head + [f] + parse_frame_at_port(game, f, pls[0]) + parse_frame_at_port(game, f, pls[1])
+                k += 1
     return d, k
 
 def replays_to_df(replay_names):
