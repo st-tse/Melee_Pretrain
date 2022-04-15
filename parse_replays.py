@@ -1,12 +1,12 @@
-from unicodedata import name
 from slippi import Game
 from slippi.parse import parse
 from slippi.parse import ParseEvent
 import pandas as pd
-from os import listdir, chdir
+from os import listdir
 from os.path import isfile, join
 from tqdm import tqdm 
 import argparse
+from unicodedata import name
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c','--count', type=int, required = False, default = -1,
@@ -21,76 +21,69 @@ parser.add_argument('-n','--name', type=str, default = 'replay_by_frame',
 args = parser.parse_args()
 
 def parse_frame_at_port(game, frame, port):
-    return [port, frame+1, game.frames[frame].ports[port].leader.pre, game.frames[frame].ports[port].leader.post]
+    return [game.frames[frame].ports[port].leader.pre, game.frames[frame].ports[port].leader.post]
 
-def read_game(file_name, args):
+def read_game(file_name):
     try:
-        return Game(f'{args.replays}/{file_name}')
+        return Game(f'../Replays/{file_name}')
     except:
         print(f'Failed to parse {file_name}')
 
-def add_replay(file_name, d, k, args):
-    game = read_game(file_name, args)
+def add_replay(file_name, d, k):
+    game = read_game(file_name)
     if game is None:
             print(f'{file_name} is None')
     else: 
-        for i in range(len(game.start.players)):
-            pl = game.start.players[i]
-            if not(pl is None):
-                char = pl.character.name
-                head = [file_name, char]
-                for f in range(len(game.frames)):
-                    d[k] = head + parse_frame_at_port(game, f, i)
-                    k += 1
+        #get uses ports
+        pls = [i for i, p in enumerate(game.start.players) if not(p is None)]
+        player_info = game.start.players
+        char_1 = player_info[pls[0]].character.name
+        char_2 = player_info[pls[1]].character.name
+        head = [file_name, char_1, char_2]
+        #add each frame
+        for f in range(len(game.frames)):
+            d[k] = head + [f] + parse_frame_at_port(game, f, pls[0]) + parse_frame_at_port(game, f, pls[1])
+            k += 1
     return d, k
 
-def replays_to_df(replay_names, args):
+def replays_to_df(replay_names):
     data = dict()
     k = 0
-    for replay in tqdm(replay_names):
-        data, k = add_replay(replay, data, k, args)
-    df = pd.DataFrame.from_dict(data, columns=['Game_ID','CHAR', 'Port','Frame', 'Pre_frame', 'Post_frame'], orient='index')
-    return df
-
-def get_states(df):
-    post = df['Post_frame']
-    df['S_airborne'] = post.apply(lambda x : x.airborne).values
-    df['S_damage'] = post.apply(lambda x : x.damage).values
-    df['S_direction'] = post.apply(lambda x : x.direction).values
-    df['S_hit_stun'] = post.apply(lambda x : x.hit_stun).values
-    df['S_position_x'] = post.apply(lambda x : x.position.x).values
-    df['S_position_y'] = post.apply(lambda x : x.position.y).values
-    df['S_shield'] = post.apply(lambda x : x.shield).values
-    df['S_state'] = post.apply(lambda x : x.state).values
-    df['S_state_age'] = post.apply(lambda x : x.state_age).values
-    df['S_stocks'] = post.apply(lambda x : x.stocks).values
+    for replay in replay_names:
+        data, k = add_replay(replay, data, k)
+    df = pd.DataFrame.from_dict(data, columns=['Game_ID','CHAR_P1', 'CHAR_P2','Frame', 'Pre_P1', 'Post_P1', 'Pre_P2', 'Post_P2'], orient='index')
     return df
 
 def get_buttons(df):
-    pre = df['Pre_frame']
-    df['B_damage'] = pre.apply(lambda x : x.damage).values
-    df['B_direction'] = pre.apply(lambda x : x.damage).values
-    df['B_joystick_x'] = pre.apply(lambda x : x.joystick.x).values
-    df['B_joystick_y'] = pre.apply(lambda x : x.joystick.y).values
-    df['B_position_x'] = pre.apply(lambda x : x.position.x).values
-    df['B_position_y'] = pre.apply(lambda x : x.position.y).values
-    df['B_cstick_x'] = pre.apply(lambda x : x.cstick.x).values
-    df['B_cstick_y'] = pre.apply(lambda x : x.cstick.y).values
-    df['B_state'] = pre.apply(lambda x : x.state).values
-    df['B_raw_analog'] = pre.apply(lambda x : x.raw_analog_x).values
-    df['B_buttons_physical'] = pre.apply(lambda x : x.buttons.physical.value).values
-    df['B_buttons_physical'] = pre.apply(lambda x : x.buttons.logical.value).values
-    df['B_triggers_physical_l'] = pre.apply(lambda x : x.triggers.physical.l).values
-    df['B_triggers_physical_r'] = pre.apply(lambda x : x.triggers.physical.r).values
-    df['B_triggers_logical'] = pre.apply(lambda x : x.triggers.logical).values
+    for i in [1,2]:
+        pre = df[f'Pre_P{i}']
+        df[f'B_damage_P{i}'] = pre.apply(lambda x : x.damage).values
+        df[f'B_direction_P{i}'] = pre.apply(lambda x : x.damage).values
+        df[f'B_joystick_x_P{i}'] = pre.apply(lambda x : x.joystick.x).values
+        df[f'B_joystick_y_P{i}'] = pre.apply(lambda x : x.joystick.y).values
+        df[f'B_position_x_P{i}'] = pre.apply(lambda x : x.position.x).values
+        df[f'B_position_y_P{i}'] = pre.apply(lambda x : x.position.y).values
+        df[f'B_cstick_x_P{i}'] = pre.apply(lambda x : x.cstick.x).values
+        df[f'B_cstick_y_P{i}'] = pre.apply(lambda x : x.cstick.y).values
+        df[f'B_state_P{i}'] = pre.apply(lambda x : x.state).values
+        df[f'B_raw_analog_P{i}'] = pre.apply(lambda x : x.raw_analog_x).values
+        df[f'B_buttons_physical_P{i}'] = pre.apply(lambda x : x.buttons.physical.value).values
+        df[f'B_buttons_physical_P{i}'] = pre.apply(lambda x : x.buttons.logical.value).values
+        df[f'B_triggers_physical_l_P{i}'] = pre.apply(lambda x : x.triggers.physical.l).values
+        df[f'B_triggers_physical_r_P{i}'] = pre.apply(lambda x : x.triggers.physical.r).values
+        df[f'B_triggers_logical_P{i}'] = pre.apply(lambda x : x.triggers.logical).values
+    
+    df = df.drop(['Pre_P1', 'Pre_P2'], axis = 1)
     return df
 
-files = listdir('Replays/')
-df = replays_to_df(files[:args.count], args)
+def df_column_switch(df, column1, column2):
+    i = list(df.columns)
+    a, b = i.index(column1), i.index(column2)
+    i[b], i[a] = i[a], i[b]
+    df = df[i]
+    return df
+
 df = get_states(df)
 df = get_buttons(df)
 
-chdir(f'{args.output}/')
-df.to_csv(f'{args.name}')
 
-print('Done')
