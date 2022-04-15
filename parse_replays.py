@@ -29,7 +29,7 @@ def parse_frame_at_port(game, frame, port):
 
 def read_game(file_name):
     try:
-        return Game(f'{args.replays}/{file_name}')
+        return Game(f'../{args.replays}/{file_name}')
     except:
         print(f'Failed to parse {file_name}')
 
