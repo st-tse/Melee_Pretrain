@@ -10,10 +10,17 @@ import argparse
 from unicodedata import name
 import numpy as np
 
+import warnings
+from pandas.core.common import SettingWithCopyWarning
+
+warnings.simplefilter(action="ignore", category=SettingWithCopyWarning)
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-b','--batch_size', type=int, required = False, default = 32,
                     help='number of files to parse per batch')
-parser.add_argument('-rb', '--resume_batch', type=int, required=False, default = 1,
+parser.add_argument('-sb', '--start_batch', type=int, required=False, default = 1,
+                    help='batch number to resume from')
+parser.add_argument('-eb', '--end_batch', type=int, required=False,
                     help='batch number to resume from')
 parser.add_argument('-r','--replays', type=str, default = 'Replays',
                     help='replays folder file path')
@@ -130,8 +137,14 @@ files = listdir(f'{args.replays}/')
 chdir(f'{args.output}/')
 first = True
 
-batch_number = args.resume_batch
-for i in range((args.resume_batch - 1) * args.batch_size, len(files), args.batch_size):
+batch_number = args.start_batch
+
+if args.end_batch:
+    end = min(args.end_batch * args.batch_size, len(files))
+else:
+    end = len(files)
+
+for i in range((args.start_batch - 1) * args.batch_size, end, args.batch_size):
     
     df = replays_to_df(files[i:i+args.batch_size])
 
