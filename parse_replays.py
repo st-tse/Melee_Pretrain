@@ -54,6 +54,23 @@ def replays_to_df(replay_names):
     df = pd.DataFrame.from_dict(data, columns=['Game_ID','CHAR_P1', 'CHAR_P2','Frame', 'Pre_P1', 'Post_P1', 'Pre_P2', 'Post_P2'], orient='index')
     return df
 
+def get_states(df):
+    for i in [1,2]:
+        post = df[f'Post_P{i}']
+        df[f'S_airborne_P{i}'] = post.apply(lambda x : x.airborne).values
+        df[f'S_damage_P{i}'] = post.apply(lambda x : x.damage).values
+        df[f'S_direction_P{i}'] = post.apply(lambda x : x.direction).values
+        df[f'S_hit_stun_P{i}'] = post.apply(lambda x : x.hit_stun).values
+        df[f'S_position_x_P{i}'] = post.apply(lambda x : x.position.x).values
+        df[f'S_position_y_P{i}'] = post.apply(lambda x : x.position.y).values
+        df[f'S_shield_P{i}'] = post.apply(lambda x : x.shield).values
+        df[f'S_state_P{i}'] = post.apply(lambda x : x.state).values
+        df[f'S_state_age_P{i}'] = post.apply(lambda x : x.state_age).values
+        df[f'S_stocks_P{i}'] = post.apply(lambda x : x.stocks).values
+    
+    df = df.drop(['Post_P1', 'Post_P2'], axis = 1)
+    return df
+
 def get_buttons(df):
     for i in [1,2]:
         pre = df[f'Pre_P{i}']
@@ -83,7 +100,50 @@ def df_column_switch(df, column1, column2):
     df = df[i]
     return df
 
+X_cols = ['Game_ID', 'CHAR_P1', 'CHAR_P2', 'Frame', 'S_airborne_P1',
+       'S_damage_P1', 'S_direction_P1', 'S_hit_stun_P1', 'S_position_x_P1',
+       'S_position_y_P1', 'S_shield_P1', 'S_state_P1', 'S_state_age_P1',
+       'S_stocks_P1', 'S_airborne_P2', 'S_damage_P2', 'S_direction_P2',
+       'S_hit_stun_P2', 'S_position_x_P2', 'S_position_y_P2', 'S_shield_P2',
+       'S_state_P2', 'S_state_age_P2', 'S_stocks_P2']
+
+y_cols_P1 = ['Game_ID','Frame','B_damage_P1',
+       'B_direction_P1', 'B_joystick_x_P1', 'B_joystick_y_P1',
+       'B_position_x_P1', 'B_position_y_P1', 'B_cstick_x_P1', 'B_cstick_y_P1',
+       'B_state_P1', 'B_raw_analog_P1', 'B_buttons_physical_P1',
+       'B_triggers_physical_l_P1', 'B_triggers_physical_r_P1',
+       'B_triggers_logical_P1']
+          
+y_cols_P2 =['Game_ID','Frame','B_damage_P2', 'B_direction_P2',
+       'B_joystick_x_P2', 'B_joystick_y_P2', 'B_position_x_P2',
+       'B_position_y_P2', 'B_cstick_x_P2', 'B_cstick_y_P2', 'B_state_P2',
+       'B_raw_analog_P2', 'B_buttons_physical_P2', 'B_triggers_physical_l_P2',
+       'B_triggers_physical_r_P2', 'B_triggers_logical_P2']
+
+files = listdir('../Replays/')
+df = replays_to_df(files[:5])
+
 df = get_states(df)
 df = get_buttons(df)
 
+df_X = df[X_cols]
+df_y_P1 = df[y_cols_P1]
+df_y_P2 = df[y_cols_P2]
 
+df_y_P1['Frame'] = df_y_P1['Frame'].apply(lambda x : x - 1)
+df_y_P2['Frame'] = df_y_P2['Frame'].apply(lambda x : x - 1)
+
+out1 = pd.merge(df_X, df_y_P1, on=['Game_ID', 'Frame'])
+
+df_X2 = df_column_switch(df_X, 'CHAR_P1', 'CHAR_P2')
+
+df_y_P2 = df_y_P2.reindex(columns=['Game_ID','Frame','B_damage_P1',
+       'B_direction_P1', 'B_joystick_x_P1', 'B_joystick_y_P1',
+       'B_position_x_P1', 'B_position_y_P1', 'B_cstick_x_P1', 'B_cstick_y_P1',
+       'B_state_P1', 'B_raw_analog_P1', 'B_buttons_physical_P1',
+       'B_triggers_physical_l_P1', 'B_triggers_physical_r_P1',
+       'B_triggers_logical_P1'])
+
+out2 = pd.merge(df_X2, df_y_P2, on=['Game_ID', 'Frame'])
+
+out = pd.concat([out1,out2],ignore_index=True)
