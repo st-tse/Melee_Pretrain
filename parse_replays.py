@@ -189,14 +189,16 @@ for i in range((args.start_batch - 1) * args.batch_size, end, args.batch_size):
     #always predicting "P2" buttons
     df_X2 = df_column_switch(df_X, 'CHAR_P1', 'CHAR_P2')
 
-    df_y_P2 = df_y_P2.reindex(columns=['Game_ID','Frame','B_damage_P1',
-           'B_direction_P1', 'B_joystick_x_P1', 'B_joystick_y_P1',
-           'B_position_x_P1', 'B_position_y_P1', 'B_cstick_x_P1', 'B_cstick_y_P1',
-           'B_state_P1', 'B_raw_analog_P1', 'B_buttons_physical_P1',
-           'B_triggers_physical_l_P1', 'B_triggers_physical_r_P1',
-           'B_triggers_logical_P1'])
+    df_y_P2.columns=['Game_ID','Frame','B_damage_P1',
+       'B_direction_P1', 'B_joystick_x_P1', 'B_joystick_y_P1',
+       'B_position_x_P1', 'B_position_y_P1', 'B_cstick_x_P1', 'B_cstick_y_P1',
+       'B_state_P1', 'B_raw_analog_P1', 'B_buttons_physical_P1',
+       'B_triggers_physical_l_P1', 'B_triggers_physical_r_P1',
+       'B_triggers_logical_P1']
 
     out2 = pd.merge(df_X2, df_y_P2, on=['Game_ID', 'Frame'])
+
+    print(out2.columns)
 
     #combine dfs and save
     out = pd.concat([out1,out2],ignore_index=True)
