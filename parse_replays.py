@@ -198,8 +198,6 @@ for i in range((args.start_batch - 1) * args.batch_size, end, args.batch_size):
 
     out2 = pd.merge(df_X2, df_y_P2, on=['Game_ID', 'Frame'])
 
-    print(out2.columns)
-
     #combine dfs and save
     out = pd.concat([out1,out2],ignore_index=True)
 
