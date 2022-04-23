@@ -26,7 +26,7 @@ parser.add_argument('-n','--out_name', type=str, default = 'replay_by_frame',
 parser.add_argument('-off','--offset', type=int, default = 6,
                     help='frame offset between state and buttons to predict')
 parser.add_argument('-c', '--characters', type=list,  nargs='+', required = False, default = ['FOX', 'MARTH'],
-                    help='frame offset between state and buttons to predict')
+                    help='characters to use, otherwise skip. selects all pairwise combinations in the list including mirror')
 
 
 args = parser.parse_args()
