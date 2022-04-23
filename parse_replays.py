@@ -187,7 +187,7 @@ for i in range((args.start_batch - 1) * args.batch_size, end, args.batch_size):
 
     #set P2 to be the same format as P1
     #always predicting "P2" buttons
-    cols = ['CHAR','S_damage_P', 'S_direction_P', 'S_hit_stun_P', 'S_position_x_P',
+    cols = ['CHAR_P','S_damage_P', 'S_direction_P', 'S_hit_stun_P', 'S_position_x_P',
        'S_position_y_P', 'S_shield_P', 'S_state_P', 'S_state_age_P',
        'S_stocks_P']
     for c in cols:
