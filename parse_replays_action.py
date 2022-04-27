@@ -67,7 +67,7 @@ else:
 #loop through batches to parse
 for i in range((args.start_batch - 1) * args.batch_size, end, args.batch_size):
     
-    df = replays_to_df(files[i:i+args.batch_size])
+    df = replays_to_df(files[i:i+args.batch_size], args)
 
     df = get_states(df)
     df = get_buttons(df)

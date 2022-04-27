@@ -11,7 +11,7 @@ def parse_frame_at_port(game, frame, port):
     """
     return [game.frames[frame].ports[port].leader.pre, game.frames[frame].ports[port].leader.post]
 
-def read_game(file_name):
+def read_game(file_name, args):
     """
     read a game file using slippi parser returing Game object
     Prints out if fails to read
@@ -21,11 +21,11 @@ def read_game(file_name):
     except:
         print(f'Failed to parse {file_name}')
 
-def add_replay(file_name, d, k):
+def add_replay(file_name, d, k, args):
     """
     adds replay [file_name] to dictionary [d] and maintains an iterator [k] for the index numbers
     """
-    game = read_game(file_name)
+    game = read_game(file_name, args)
     if game is None:
         print(f'{file_name} is None')
     else: 
@@ -42,7 +42,7 @@ def add_replay(file_name, d, k):
                 k += 1
     return d, k
 
-def replays_to_df(replay_names):
+def replays_to_df(replay_names, args):
     """
     add all replays in [replay_names] to a dataframe
     each frame is a row
@@ -50,7 +50,7 @@ def replays_to_df(replay_names):
     data = dict()
     k = 0
     for replay in replay_names:
-        data, k = add_replay(replay, data, k)
+        data, k = add_replay(replay, data, k, args)
     df = pd.DataFrame.from_dict(data, columns=['Game_ID','CHAR_P1', 'CHAR_P2','Frame', 'Pre_P1', 'Post_P1', 'Pre_P2', 'Post_P2'], orient='index')
     return df
 
