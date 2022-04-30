@@ -29,13 +29,11 @@ df['CHAR_P2'] = enc_p2.transform(df['CHAR_P2'])
 df['S_airborne_P1'] = df['S_airborne_P1'].astype(bool).astype(float)
 df['S_airborne_P2'] = df['S_airborne_P2'].astype(bool).astype(float)
 
-train, test = split_data(df)
-
-train_scaler = StandardScaler().fit(train)
-train = train_scaler.transform(train)
-test = train_scaler.transform(test)
+x_train, y_train, x_test, y_test = split_data(df)
 
 os.chdir('./Datasets/')
 
-pd.DataFrame(train).to_csv(f'{args.dataset}_train.csv', index=False)
-pd.DataFrame(test).to_csv(f'{args.dataset}_test.csv', index=False)
+pd.DataFrame(x_train).to_csv(f'{args.dataset}_x_train.csv', index=False)
+pd.DataFrame(y_train).to_csv(f'{args.dataset}_y_train.csv', index=False)
+pd.DataFrame(x_test).to_csv(f'{args.dataset}_x_test.csv', index=False)
+pd.DataFrame(y_test).to_csv(f'{args.dataset}_y_test.csv', index=False)

@@ -16,12 +16,9 @@ y_cols = ['B_damage_P1',
    'B_triggers_logical_P1']
 
 class FrameDataset(Dataset):
-    def __init__(self,df):
-
-        self.X = df[X_cols]
-        self.y = df[y_cols]
-        self.x_train=torch.tensor(self.X,dtype=torch.float32)
-        self.y_train=torch.tensor(self.y,dtype=torch.float32)
+    def __init__(self,X,y):
+        self.x_train=torch.tensor(X,dtype=torch.float32)
+        self.y_train=torch.tensor(y,dtype=torch.float32)
         
     def __len__(self):
         return len(self.y_train)
@@ -38,5 +35,11 @@ def split_data(df, test_size=0.2):
     test = df[df['Game_ID'].isin(test_ids)]
     train.drop('Game_ID', axis = 1, inplace=True)
     test.drop('Game_ID', axis = 1, inplace=True)
-    return train, test
+
+    x_train = train[X_cols]
+    y_train = train[y_cols]
+    x_test = test[X_cols]
+    y_test = test[y_cols]
+
+    return x_train, y_test, x_test, y_test
 
