@@ -5,13 +5,17 @@ import numpy as np
 import pandas as pd
 import os
 
-from data_module import X_cols, y_cols, split_data
+from data_module import split_data
 
 import argparse
+
+pd.options.mode.chained_assignment = None  # default='warn'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-d','--dataset', type=str, required = True,
                     help='dataset name')
+parser.add_argument('-t','--type', choices = ['b','s'], required = True,
+                    help='type of dataset')
 args = parser.parse_args()
 
 df = pd.read_csv(f"./Data/{args.dataset}.csv", low_memory=False)
@@ -29,7 +33,7 @@ df['CHAR_P2'] = enc_p2.transform(df['CHAR_P2'])
 df['S_airborne_P1'] = df['S_airborne_P1'].astype(bool).astype(float)
 df['S_airborne_P2'] = df['S_airborne_P2'].astype(bool).astype(float)
 
-x_train, y_train, x_test, y_test = split_data(df)
+x_train, y_train, x_test, y_test = split_data(df, dataset_type=args.type)
 
 os.chdir('./Datasets/')
 
