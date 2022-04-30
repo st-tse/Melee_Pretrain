@@ -14,7 +14,7 @@ parser.add_argument('-d','--dataset', type=str, required = True,
                     help='dataset name')
 args = parser.parse_args()
 
-df = pd.read_csv("./Data/{dataset}.csv", low_memory=False)
+df = pd.read_csv(f"./Data/{args.dataset}.csv", low_memory=False)
 df.dropna(axis=0, how='any', inplace=True)
 
 #enc characters
@@ -35,7 +35,7 @@ train_scaler = StandardScaler().fit(train)
 train = train_scaler.transform(train)
 test = train_scaler.transform(test)
 
-os.chdir('./{args.output}')
+os.chdir('./Datasets/')
 
-pd.DataFrame(train).to_csv("f{dataset}_train.csv")
-pd.DataFrame(test).to_csv("f{dataset}_test.csv")
+pd.DataFrame(train).to_csv(f'{args.dataset}_train.csv', index=False)
+pd.DataFrame(test).to_csv(f'{args.dataset}_test.csv', index=False)

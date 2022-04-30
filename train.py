@@ -8,13 +8,21 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.optim.lr_scheduler import OneCycleLR
 from torch.utils.data import DataLoader
+import pandas as pd
+import numpy as np
+
+from data_module import X_cols, y_cols, FrameDataset
+from ff_network import Net
 
 from tqdm import tqdm
 
-import argparse
+dataset = 'mini_dataset'
 
-training_loader = 
-testing_loader = 
+train = FrameDataset(pd.read_csv(dataset+'_train'))
+test = FrameDataset(pd.read_csv(dataset+'_test'))
+
+training_loader = DataLoader(train)
+testing_loader = DataLoader(test)
 
 batch_size = 64
 max_lr = .05
@@ -23,8 +31,31 @@ n_runs = 1
 
 steps_per_epoch = len(training_loader)
 
+# Allow for a version to be provided at the command line, as in
+if len(sys.argv) > 1:
+    version = sys.argv[1]
+else:
+    version = "test"
+
+# Lay out the desitinations for all the results.
+accuracy_results_path = os.path.join(f"results", f"accuracy_{version}.npy")
+accuracy_history_path = os.path.join(
+    "results", f"accuracy_history_{version}.npy")
+loss_results_path = os.path.join("results", f"loss_{version}.npy")
+os.makedirs("results", exist_ok=True)
+
+# Restore any previously generated results.
+try:
+    accuracy_results = np.load(accuracy_results_path).tolist()
+    accuracy_histories = np.load(accuracy_history_path).tolist()
+    loss_results = np.load(loss_results_path).tolist()
+except Exception:
+    loss_results = []
+    accuracy_results = []
+    accuracy_histories = []
+
 for i_run in range(n_runs):
-    network = 
+    network = Net()
     # print(f"Model has {network.n_params()} parameters
     optimizer = optim.Adam(network.parameters(), lr=max_lr)
     scheduler = OneCycleLR(
@@ -93,6 +124,14 @@ for i_run in range(n_runs):
             f"training accuracy: {100 * training_accuracy:.04}%   "
             f"testing accuracy: {100 * testing_accuracy:.04}%"
         )
+
+        accuracy_histories.append(epoch_accuracy_history)
+        accuracy_results.append(testing_accuracy)
+        loss_results.append(testing_loss)
+
+        np.save(accuracy_history_path, np.array(accuracy_histories))
+        np.save(accuracy_results_path, np.array(accuracy_results))
+        np.save(loss_results_path, np.array(loss_results))
 
 
 
