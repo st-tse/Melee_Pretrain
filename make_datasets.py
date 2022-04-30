@@ -30,8 +30,15 @@ enc_p2.fit(df['CHAR_P2'])
 df['CHAR_P1'] = enc_p1.transform(df['CHAR_P1'])
 df['CHAR_P2'] = enc_p2.transform(df['CHAR_P2'])
 
-df['S_airborne_P1'] = df['S_airborne_P1'].astype(bool).astype(float)
-df['S_airborne_P2'] = df['S_airborne_P2'].astype(bool).astype(float)
+try:
+    df['S_airborne_P1'] = df['S_airborne_P1'].astype(bool).astype(float)
+    df['S_airborne_P2'] = df['S_airborne_P2'].astype(bool).astype(float)
+except:
+    df['S_airborne_P1_x'] = df['S_airborne_P1_x'].astype(bool).astype(float)
+    df['S_airborne_P2_x'] = df['S_airborne_P2_x'].astype(bool).astype(float)
+    df['S_airborne_P1_y'] = df['S_airborne_P1_y'].astype(bool).astype(float)
+    df['S_airborne_P2_y'] = df['S_airborne_P2_y'].astype(bool).astype(float)
+
 
 x_train, y_train, x_test, y_test = split_data(df, dataset_type=args.type)
 
