@@ -42,6 +42,16 @@ except:
 
 x_train, y_train, x_test, y_test = split_data(df, dataset_type=args.type)
 
+print(x_train)
+
+X_train_scaler = StandardScaler().fit(x_train)
+x_train = X_train_scaler.transform(x_train)
+x_test = X_train_scaler.transform(x_test)
+
+y_train_scaler = StandardScaler().fit(y_train)
+y_train = y_train_scaler.transform(y_train)
+y_test = y_train_scaler.transform(y_test)
+
 os.chdir('./Datasets/')
 
 pd.DataFrame(x_train).to_csv(f'{args.dataset}_x_train.csv', index=False)

@@ -26,7 +26,7 @@ y_cols_b = ['B_damage_P1',
    'B_triggers_physical_l_P1', 'B_triggers_physical_r_P1',
    'B_triggers_logical_P1']
 
-X_cols_s = ['CHAR_P1', 'CHAR_P2', 'Frame', 'S_airborne_P1_x',
+X_cols_s = ['CHAR_P1', 'CHAR_P2', 'S_airborne_P1_x',
        'S_damage_P1_x', 'S_direction_P1_x', 'S_hit_stun_P1_x',
        'S_position_x_P1_x', 'S_position_y_P1_x', 'S_shield_P1_x',
        'S_state_P1_x', 'S_state_age_P1_x', 'S_stocks_P1_x', 'S_airborne_P2_x',

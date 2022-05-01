@@ -14,12 +14,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder
 from sklearn.feature_extraction.text import CountVectorizer
 
-from data_module import X_cols, y_cols, FrameDataset
+from data_module import FrameDataset
 from ff_network import Net
 
 from tqdm import tqdm
 
-dataset = 'mini_dataset'
+dataset = 'mini_state'
 
 x_train = pd.read_csv(f'Datasets/{dataset}_x_train.csv')
 y_train = pd.read_csv(f'Datasets/{dataset}_y_train.csv')
@@ -46,7 +46,7 @@ n_epochs = 100
 n_runs = 1
 input_size = x_train.shape[1]
 output_size = y_train.shape[1]
-h_size = 128
+h_size = 64
 
 steps_per_epoch = len(training_loader)
 
