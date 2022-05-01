@@ -1,27 +1,20 @@
-import os
-import sys
+from tqdm import tqd
+from datetime import datetime
+import argparse
+import pandas as pd
 import time
-import numpy as np
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.optim.lr_scheduler import OneCycleLR
 from torch.utils.data import DataLoader
-import pandas as pd
-import numpy as np
-
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder
-from sklearn.feature_extraction.text import CountVectorizer
 
 from data_module import FrameDataset
 from ff_network import Net
 
-from utils import createdirs, log
+from train_utils import createdirs, log
 
-from tqdm import tqdm
-from datetime import datetime
-import argparse
+
 
 parser = argparse.ArgumentParser(description='SCS Train')
 parser.add_argument('--model', default='', choices = ['rnn', 'ff'], help='model type')
@@ -66,6 +59,7 @@ steps_per_epoch = len(training_loader)
 network = model_gen().to(device)
 print(f"Training: {args.model}")
 
+#maybe add option for SGD instead
 optimizer = optim.Adam(network.parameters(), lr=max_lr)
 
 path = 'logs/' + args.model + '/' + datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
@@ -110,6 +104,8 @@ for i_epoch in range(n_epochs):
     training_loss = epoch_training_loss / len(training_loader.dataset)
     training_accuracy = (epoch_training_num_correct / len(training_loader.dataset))
 
+    #test set
+    #maybe change this to do less often for speed
     with torch.no_grad():
         for batch in testing_loader:
             images, labels = batch
@@ -126,5 +122,6 @@ for i_epoch in range(n_epochs):
     log('Epoch {} Train Loss {} Train Accuracy {} Test Loss {} Test Accuracy {}'.format(
     i_epoch, training_loss, training_accuracy, testing_loss, testing_accuracy), log_file)
 
+#save model checkpoint
 torch.save(network.state_dict(), path + '.pt')
 log_file.close()

@@ -1,12 +1,5 @@
 from slippi import Game
 import pandas as pd
-import os
-import sys
-from os import listdir
-from os import listdir, chdir
-import argparse
-import numpy as np
-import errno
 
 def parse_frame_at_port(game, frame, port):
     """
@@ -111,15 +104,3 @@ def df_column_switch(df, column1, column2):
     i[b], i[a] = i[a], i[b]
     df = df[i]
     return df
-
-def createdirs(path):
-    if not os.path.exists(os.path.dirname(path)):
-        try:
-            os.makedirs(os.path.dirname(path))
-        except OSError as exc:
-            if exc.errno != errno.EEXIST:
-                raise
-
-def log(str, f):
-    print(str, file=sys.stderr)
-    print(str, file=f)
